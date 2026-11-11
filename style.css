@@ -172,9 +172,9 @@ main {
   width: fit-content;
   max-width: 100%;
   padding: 13px 16px;
-  border: 1px solid #e8e4de;
-  border-radius: 2px 12px 12px 12px;
-  background: var(--paper);
+  border: 1px solid #d8d1c8;
+  border-radius: 4px 16px 16px 16px;
+  background: #f0ede8;
   color: var(--ink);
   font-size: 15px;
   line-height: 1.6;
@@ -185,7 +185,7 @@ main {
 .message.user .message-bubble {
   margin-left: auto;
   border-color: var(--ink);
-  border-radius: 12px 2px 12px 12px;
+  border-radius: 16px 4px 16px 16px;
   background: var(--ink);
   color: white;
 }
