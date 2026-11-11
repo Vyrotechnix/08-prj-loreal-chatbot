@@ -1,5 +1,5 @@
 // Set this to the class-hosted Cloudflare Worker URL from your course materials.
-const workerUrl = "PASTE_YOUR_CLOUDFLARE_WORKER_URL_HERE";
+const workerUrl = "https://08-prj-loreal-chatbot.shahvir1.workers.dev/api/chat";
 
 /* Find the page elements the chatbot needs to update. */
 const chatForm = document.getElementById("chatForm");
@@ -66,11 +66,21 @@ chatForm.addEventListener("submit", async (event) => {
       body: JSON.stringify({ messages: conversation }),
     });
 
-    const data = await response.json();
+    let data;
+    try {
+      data = await response.json();
+    } catch {
+      throw new Error(`The Worker returned a non-JSON response (HTTP ${response.status}). Check that workerUrl points to the deployed chat Worker.`);
+    }
+
     const reply = data.choices?.[0]?.message?.content;
 
-    if (!response.ok || !reply) {
-      throw new Error("The Worker did not return a reply.");
+    if (!response.ok) {
+      throw new Error(data.error?.message || data.error || `The Worker returned HTTP ${response.status}.`);
+    }
+
+    if (!reply) {
+      throw new Error("The Worker response did not include a chat reply.");
     }
 
     conversation.push({ role: "assistant", content: reply });
@@ -79,8 +89,9 @@ chatForm.addEventListener("submit", async (event) => {
   } catch (error) {
     // Do not keep a question that the assistant could not answer in the conversation history.
     conversation.pop();
-    addMessage("assistant", "I'm having trouble connecting right now. Please check the Worker URL and deployment, then try again.");
-    chatStatus.textContent = "Connection issue. Your question is still visible above.";
+    const errorMessage = error instanceof Error ? error.message : "Unknown connection error.";
+    addMessage("assistant", `I couldn't get a reply: ${errorMessage}`);
+    chatStatus.textContent = "Connection issue. Check the Worker URL, deployment, and Cloudflare secret.";
   } finally {
     sendBtn.disabled = false;
     userInput.focus();

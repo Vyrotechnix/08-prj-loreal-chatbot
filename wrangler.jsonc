@@ -1,0 +1,11 @@
+{
+  "name": "08-prj-loreal-chatbot",
+  "main": "RESOURCE_cloudflare-worker.js",
+  "compatibility_date": "2026-11-09",
+  "assets": {
+    "directory": "."
+  },
+  "observability": {
+    "enabled": true
+  }
+}
