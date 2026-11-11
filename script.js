@@ -33,6 +33,24 @@ function addMessage(role, text) {
   message.append(speaker, bubble);
   chatWindow.append(message);
   chatWindow.scrollTop = chatWindow.scrollHeight;
+  return bubble;
+}
+
+// Show animated dots in the assistant bubble while the reply is loading.
+function addThinkingMessage() {
+  const bubble = addMessage("assistant", "");
+  bubble.classList.add("thinking");
+
+  const dots = document.createElement("span");
+  dots.className = "thinking-dots";
+  dots.setAttribute("aria-hidden", "true");
+
+  for (let index = 0; index < 3; index += 1) {
+    dots.append(document.createElement("span"));
+  }
+
+  bubble.append(dots);
+  return bubble;
 }
 
 // Send the current question and earlier conversation to the Cloudflare Worker.
@@ -59,6 +77,7 @@ chatForm.addEventListener("submit", async (event) => {
     return;
   }
 
+  const assistantBubble = addThinkingMessage();
   conversation.push({ role: "user", content: question });
 
   try {
@@ -86,13 +105,17 @@ chatForm.addEventListener("submit", async (event) => {
     }
 
     conversation.push({ role: "assistant", content: reply });
-    addMessage("assistant", reply);
+    assistantBubble.classList.remove("thinking");
+    assistantBubble.textContent = reply;
+    chatWindow.scrollTop = chatWindow.scrollHeight;
     chatStatus.textContent = "Beauty advice, thoughtfully tailored. For personal medical advice, consult a professional.";
   } catch (error) {
     // Do not keep a question that the assistant could not answer in the conversation history.
     conversation.pop();
     const errorMessage = error instanceof Error ? error.message : "Unknown connection error.";
-    addMessage("assistant", `I couldn't get a reply: ${errorMessage}`);
+    assistantBubble.classList.remove("thinking");
+    assistantBubble.textContent = `I couldn't get a reply: ${errorMessage}`;
+    chatWindow.scrollTop = chatWindow.scrollHeight;
     chatStatus.textContent = "Connection issue. Check the Worker URL, deployment, and Cloudflare secret.";
   } finally {
     sendBtn.disabled = false;
