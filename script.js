@@ -44,6 +44,8 @@ chatForm.addEventListener("submit", async (event) => {
     return;
   }
 
+  // Show only the latest exchange while keeping earlier turns in conversation for context.
+  chatWindow.replaceChildren();
   addMessage("user", question);
   userInput.value = "";
   chatStatus.textContent = "Thinking through your question...";
